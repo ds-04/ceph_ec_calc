@@ -23,6 +23,7 @@ SERVER_COUNT=args["servers"]
 #EC
 EC_K=args["chunks"]  #number of chunks to divide object into
 EC_M=args["parity"] #additional parity chunks
+EC_TOTAL=EC_K+EC_M #total chunks, added for check only
 
 #DRIVES
 DRIVE_SIZE=args["capacity"] #TB
@@ -34,10 +35,10 @@ if SERVER_COUNT < 1:
    print("ERROR - SERVER_COUNT SHOULD BE > 1")
    sys.exit(1)
 if EC_K < 2:
-   print("ERROR - CHUNKS SHOULD BE > 2")
+   print("ERROR - K CHUNKS SHOULD BE > 2")
    sys.exit(1)
 if EC_M < 1:
-   print("ERROR - PARTITY SHOULD BE > 1")
+   print("ERROR - M PARTITY SHOULD BE > 1")
    sys.exit(1)
 if DRIVE_SIZE < 1:
    print("ERROR - DRIVE_SIZE SHOULD BE > 1")
@@ -47,7 +48,15 @@ if DRIVE_PER_SERVER < 1:
    sys.exit(1)
 
 if EC_M >= EC_K:
-   print("ERROR - PARITY MUST BE LESS THAN CHUNKS")
+   print("ERROR - M PARITY MUST BE LESS THAN K CHUNKS")
+   sys.exit(1)
+
+if EC_TOTAL > SERVER_COUNT:
+   print("ERROR - SERVER_COUNT SHOULD BE >= EC CHUNK TOTAL (K+M)")
+   print("SERVER_COUNT WAS "+str(SERVER_COUNT))
+   print("K WAS "+str(EC_K))
+   print("M WAS "+str(EC_M))
+   print("EC CHUNK TOTAL WAS "+str(EC_TOTAL))
    sys.exit(1)
 
 # ***CALCULATIONS IN TB***
@@ -61,18 +70,21 @@ EIGHTY_FULL_USAGE=float(0.80*FULL_USAGE)
 
 # ***OUTPUT ***
 print("----")
-print("Using DRIVE_SIZE (TB) "+str(DRIVE_SIZE))
-print("Using DRIVE_PER_SERVER "+str(DRIVE_PER_SERVER))
-print("Results in SERVER_SIZE of "+str(SERVER_SIZE))
-print("Using SERVER_COUNT "+str(SERVER_COUNT))
+print("-c "+str(DRIVE_SIZE)+" | Using DRIVE_SIZE (TB) "+str(DRIVE_SIZE))
+print("-d "+str(DRIVE_PER_SERVER)+" | Using DRIVE_PER_SERVER "+str(DRIVE_PER_SERVER))
+print("-s "+str(SERVER_COUNT)+" | Using SERVER_COUNT "+str(SERVER_COUNT))
+print("----")
+print("Results in SERVER_SIZE (TB) "+str(SERVER_SIZE))
 print("Results in RAW (TB) "+str(RAW))
 print("----")
-print("Using K (min copy) of "+str(EC_K))
-print("Using M (resiliancy) of "+str(EC_M))
-print("Results in EFFICIENCY RATIO of "+str(round(EFFICIENCY, 3)))
+print("-k "+str(EC_K)+" | Using K (min copy) of "+str(EC_K))
+print("-m "+str(EC_M)+" | Using M (resiliancy) of "+str(EC_M))
 print("----")
-print("FULL CAPACITY AT 100% **NOT RECOMMENDED!**")
+print("EFFICIENCY RATIO")
+print(str(round(EFFICIENCY, 3)))
+print("----")
+print("FULL CAPACITY (TB) AT 100% **NOT RECOMMENDED!**")
 print(round(FULL_USAGE, 3))
 print("----")
-print("80% CAPACITY - RECOMMENDED MAX FOR CEPH (SAFE CAPACITY RESERVERVATION)")
+print("80% CAPACITY (TB) - RECOMMENDED MAX FOR CEPH (SAFE CAPACITY RESERVERVATION)")
 print(round(EIGHTY_FULL_USAGE, 3))
