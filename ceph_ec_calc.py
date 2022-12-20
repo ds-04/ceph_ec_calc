@@ -12,6 +12,7 @@ parser.add_argument("-d", "--drives", type=int, default=12, help="drives per ser
 parser.add_argument("-c", "--capacity", type=int, default=12, help="drive capacity (TB)")
 parser.add_argument("-k", "--chunks", type=int, default=4, help="EC chunks")
 parser.add_argument("-m", "--parity", type=int, default=2, help="EC parity chunks")
+parser.add_argument("-t", "--table", action='store_true', help="Print in tabulate form")
 args = vars(parser.parse_args())
 
 
@@ -68,23 +69,32 @@ EFFICIENCY=float(EC_K/(float(EC_K+EC_M)))
 FULL_USAGE=float(SERVER_COUNT*EFFICIENCY*SERVER_SIZE)
 EIGHTY_FULL_USAGE=float(0.80*FULL_USAGE)
 
-# ***OUTPUT ***
-print("----")
-print("-c "+str(DRIVE_SIZE)+" | Using DRIVE_SIZE (TB) "+str(DRIVE_SIZE))
-print("-d "+str(DRIVE_PER_SERVER)+" | Using DRIVE_PER_SERVER "+str(DRIVE_PER_SERVER))
-print("-s "+str(SERVER_COUNT)+" | Using SERVER_COUNT "+str(SERVER_COUNT))
-print("----")
-print("Results in SERVER_SIZE (TB) "+str(SERVER_SIZE))
-print("Results in RAW (TB) "+str(RAW))
-print("----")
-print("-k "+str(EC_K)+" | Using K (min copy) of "+str(EC_K))
-print("-m "+str(EC_M)+" | Using M (resiliancy) of "+str(EC_M))
-print("----")
-print("EFFICIENCY RATIO")
-print(str(round(EFFICIENCY, 3)))
-print("----")
-print("FULL CAPACITY (TB) AT 100% **NOT RECOMMENDED!**")
-print(round(FULL_USAGE, 3))
-print("----")
-print("80% CAPACITY (TB) - RECOMMENDED MAX FOR CEPH (SAFE CAPACITY RESERVERVATION)")
-print(round(EIGHTY_FULL_USAGE, 3))
+if args["table"] != True:
+
+   # ***OUTPUT ***
+   print("----")
+   print("-c "+str(DRIVE_SIZE)+" | Using DRIVE_SIZE (TB) "+str(DRIVE_SIZE))
+   print("-d "+str(DRIVE_PER_SERVER)+" | Using DRIVE_PER_SERVER "+str(DRIVE_PER_SERVER))
+   print("-s "+str(SERVER_COUNT)+" | Using SERVER_COUNT "+str(SERVER_COUNT))
+   print("----")
+   print("Results in SERVER_SIZE (TB) "+str(SERVER_SIZE))
+   print("Results in RAW (TB) "+str(RAW))
+   print("----")
+   print("-k "+str(EC_K)+" | Using K (min copy) of "+str(EC_K))
+   print("-m "+str(EC_M)+" | Using M (resiliancy) of "+str(EC_M))
+   print("----")
+   print("EFFICIENCY RATIO")
+   print(str(round(EFFICIENCY, 3)))
+   print("----")
+   print("FULL CAPACITY (TB) AT 100% **NOT RECOMMENDED!**")
+   print(round(FULL_USAGE, 3))
+   print("----")
+   print("80% CAPACITY (TB) - RECOMMENDED MAX FOR CEPH (SAFE CAPACITY RESERVERVATION)")
+   print(round(EIGHTY_FULL_USAGE, 3))
+
+if args["table"] == True:
+   from tabulate import tabulate
+   table_output=[[str(DRIVE_SIZE),str(DRIVE_PER_SERVER),str(SERVER_COUNT),str(EC_K),str(EC_M),str(round(EFFICIENCY, 3)),str(round(FULL_USAGE, 3)),str(round(EIGHTY_FULL_USAGE, 3))]]
+   headers =['DriveSize(TB)','Drives','Servers','K','M','EFFICIENCY RATIO','100% CAPACITY (TB)','80% CAPACITY (TB)']
+   print(tabulate(table_output, headers, tablefmt="heavy_grid"))
+
